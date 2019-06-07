@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/seanhaneberg/controller-threejs-proto/issues"
   },
-  "homepage": "https://github.com/seanhaneberg/controller-threejs-proto#readme"
+  "homepage": "https://github.com/seanhaneberg/controller-threejs-proto#readme",
+  "devDependencies": {
+    "webpack": "^4.33.0"
+  }
 }
