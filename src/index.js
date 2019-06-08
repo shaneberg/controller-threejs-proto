@@ -1,28 +1,37 @@
 import * as THREE from 'three';
 
-function main() {
-  const canvas = document.getElementById('c');
-  const renderer = new THREE.WebGLRenderer({ canvas });
+/**
+ * Tutorial from: https://www.learnthreejs.com/beginners-tutorial/#more-13
+ */
+let WIDTH = 640;
+let HEIGHT = 360;
 
-  const fov = 75;
-  const aspect = 2;  // the canvas default
-  const near = 0.1;
-  const far = 5;
-  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+let FOV = 75;
+let ASPECT = WIDTH / HEIGHT;
+let NEAR = 0.1;
+let FAR = 2000;
 
-  const scene = new THREE.Scene();
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
 
-  const boxWidth = 1;
-  const boxHeight = 1;
-  const boxDepth = 1;
-  const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+camera.position.z = 5;
 
-  const material = new THREE.MeshBasicMaterial({ color: 0x44aa88 });
-  const cube = new THREE.Mesh(geometry, material);
-  scene.add(cube);
+var renderer = new THREE.WebGLRenderer();
+renderer.setSize(WIDTH, HEIGHT);
+document.body.appendChild(renderer.domElement);
+
+var geometry = new THREE.BoxGeometry(1, 1, 1);
+var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+var cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+var render = () => {
+  requestAnimationFrame(render);
+
+  cube.rotation.x += 0.1;
+  cube.rotation.y += 0.1;
+
   renderer.render(scene, camera);
-}
+};
 
-window.onload = () => {
-  main();
-}
+render();
