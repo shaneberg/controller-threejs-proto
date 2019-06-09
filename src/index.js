@@ -1,36 +1,35 @@
 import * as THREE from 'three';
+import style from './main.css';
 
 /**
- * Tutorial from: https://www.learnthreejs.com/beginners-tutorial/#more-13
+ * Tutorial from https://threejs.org/docs/#manual/en/introduction/Drawing-lines
  */
-let WIDTH = 640;
-let HEIGHT = 360;
-
-let FOV = 75;
-let ASPECT = WIDTH / HEIGHT;
-let NEAR = 0.1;
-let FAR = 2000;
-
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(FOV, ASPECT, NEAR, FAR);
-
-camera.position.z = 5;
 
 var renderer = new THREE.WebGLRenderer();
-renderer.setSize(WIDTH, HEIGHT);
-document.body.appendChild(renderer.domElement);
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
 
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+var camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 500 );
+camera.position.set( 0, 0, 100 );
+camera.lookAt( 0, 0, 0 );
+
+var scene = new THREE.Scene();
+
+//create a blue LineBasicMaterial
+var material = new THREE.LineBasicMaterial( { color: 0x0000ff } );
+
+var geometry = new THREE.Geometry();
+geometry.vertices.push(new THREE.Vector3( -10, 0, 0) );
+geometry.vertices.push(new THREE.Vector3( 0, 10, 0) );
+geometry.vertices.push(new THREE.Vector3( 10, 0, 0) );
+
+var line = new THREE.Line( geometry, material );
+scene.add( line );
+renderer.render( scene, camera );
 
 var render = () => {
   requestAnimationFrame(render);
-
-  cube.rotation.x += 0.1;
-  cube.rotation.y += 0.1;
-
+  geometry.rotateZ(0.01);
   renderer.render(scene, camera);
 };
 
