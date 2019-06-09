@@ -86,7 +86,7 @@ let renderBlocks = [];
 const drawBlock = (block, mat) => {
   let pos = block.getPos();
 
-  // TODO: Make a more sophisticated block creation policy? 
+  // TODO: Make a more sophisticated block creation policy?
   let newBlock = new THREE.Geometry();
   const size = 1;
   newBlock.vertices.push(new THREE.Vector3(pos.x, -pos.y, 0));
