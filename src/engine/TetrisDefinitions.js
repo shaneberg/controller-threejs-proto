@@ -53,3 +53,4 @@ class TetrisDefinitions {
 }
 
 export default TetrisDefinitions;
+
