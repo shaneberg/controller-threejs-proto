@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import style from './main.css';
 
 import TetrisEngine from './engine/TetrisEngine';
+import TetrisDefinitions from './engine/TetrisDefinitions';
 
 /**
  * Tutorial from https://threejs.org/docs/#manual/en/introduction/Drawing-lines
@@ -17,6 +18,15 @@ camera.lookAt(0, 0, 0);
 
 var scene = new THREE.Scene();
 
+const pieceSize = 4;
+
+let width = TetrisDefinitions.boardWidth * pieceSize;
+let height = TetrisDefinitions.boardHeight * pieceSize;
+let left = -width / 2;
+let right = width / 2;
+let top = height / 2;
+let bottom = -height /2;
+
 const onActivePieceReplaced = (data) => {
     data.blocks.forEach((block) => {
         let rand = Math.floor(Math.random() * colors.length);
@@ -27,7 +37,6 @@ const onActivePieceReplaced = (data) => {
     });
 };
 
-const pieceSize = 2;
 
 const onPieceMoved = (data) => {
     renderBlocks.forEach((renderBlock) => {
@@ -36,10 +45,10 @@ const onPieceMoved = (data) => {
             data.blocks.forEach((block) => {
                 if (renderBlock.block === block) {
                     let pos = block.pos;
-                    let minX = pos.x * pieceSize;
+                    let minX = left + pos.x * pieceSize;
                     let maxX = minX + pieceSize;
-                    let minY = -pos.y * pieceSize;
-                    let maxY = minY + pieceSize;
+                    let minY = (top - pos.y * pieceSize);
+                    let maxY = minY - pieceSize;
                     geometry.vertices[0].x = minX;
                     geometry.vertices[0].y = minY;
 
@@ -93,10 +102,10 @@ const drawBlock = (block, mat) => {
 
     // TODO: Make a more sophisticated lock creation policy?
     let newBlock = new THREE.Geometry()
-    let minX = pos.x * pieceSize;
-    let minY = -pos.y * pieceSize;
+    let minX = left + (pos.x * pieceSize);
+    let minY = (top -  pos.y * pieceSize);
     let maxX = minX + pieceSize;
-    let maxY = minY + pieceSize;
+    let maxY = minY - pieceSize;
     newBlock.vertices.push(new THREE.Vector3(minX, minY, 0));
     newBlock.vertices.push(new THREE.Vector3(maxX, minY, 0));
     newBlock.vertices.push(new THREE.Vector3(maxX, maxY, 0));
@@ -120,22 +129,39 @@ render();
 
 let drawBoard = () => {
     let board = new THREE.Geometry();
-    let minX = engine.minX * pieceSize;
-    let maxX = engine.maxX * pieceSize;
-    let minY = -engine.minY * pieceSize;
-    let maxY = -engine.maxY * pieceSize;
 
-    board.vertices.push(new THREE.Vector3(minX, minY, 0));
-    board.vertices.push(new THREE.Vector3(maxX, minY, 0));
-    board.vertices.push(new THREE.Vector3(maxX, maxY, 0));
-    board.vertices.push(new THREE.Vector3(minX, maxY, 0));
+    board.vertices.push(new THREE.Vector3(left, top, 0));
+    board.vertices.push(new THREE.Vector3(right, top, 0));
+    board.vertices.push(new THREE.Vector3(right, bottom, 0));
+    board.vertices.push(new THREE.Vector3(left, bottom, 0));
 
-    board.vertices.push(new THREE.Vector3(minX, minY, 0));
+    board.vertices.push(new THREE.Vector3(left, top, 0));
     return board;
 };
 
 let boardMat = new THREE.LineBasicMaterial({ color: 0xffffff });
 let board = new THREE.Line(drawBoard(), boardMat);
 scene.add(board);
+
+let debugBorder = 1;
+let drawDebug = () => {
+    let debug = new THREE.Geometry();
+    let minX = left - debugBorder;
+    let maxX = right + debugBorder;
+    let minY = bottom - debugBorder;
+    let maxY = top + debugBorder;
+
+    debug.vertices.push(new THREE.Vector3(minX, minY, 0));
+    debug.vertices.push(new THREE.Vector3(maxX, minY, 0));
+    debug.vertices.push(new THREE.Vector3(maxX, maxY, 0));
+    debug.vertices.push(new THREE.Vector3(minX, maxY, 0));
+
+    debug.vertices.push(new THREE.Vector3(minX, minY, 0));
+    return debug;
+};
+
+let debugMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+let debug = new THREE.Line(drawDebug(), debugMat);
+scene.add(debug);
 
 renderer.render(scene, camera);
