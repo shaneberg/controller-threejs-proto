@@ -118,6 +118,7 @@ const colors = [
 ];
 
 var render = () => {
+    // TODO: Only query the game pad every so often...
     let gamepads = navigator.getGamepads();
     gamepad = gamepads[0];
     if (gamepad) {
