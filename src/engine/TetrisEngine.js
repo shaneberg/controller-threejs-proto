@@ -82,15 +82,21 @@ class TetrisEngine {
     // TODO: Consider not having this bound to the single active piece
     requestActivePieceMove(xDelta, yDelta) {
         let piece = this.activePiece;
-        this.emitTetrisEvent("request move (" + xDelta + ", " + yDelta + ")");
-        return this.checkMove(piece, xDelta, yDelta) && piece.move(xDelta, yDelta);
+        this.emitTetrisEvent("request move", { piece, xDelta, yDelta });
+        if (this.checkMove(piece, xDelta, yDelta)) {
+            piece.move(xDelta, yDelta);
+            this.emitTetrisEvent("pieceMoved", piece);
+        }
     }
 
     requestActivePieceRotate(counterClockwise) {
         let piece = this.activePiece;
         var name = counterClockwise ? "CounterClockwise" : "Clockwise";
-        this.emitTetrisEvent("request" + name + "Rotation", piece);
-        return this.checkRotate(piece, counterClockwise) && piece.rotate(counterClockwise);
+        this.emitTetrisEvent("request" + name + "Rotation", piece); // TODO: A better job
+        if (this.checkRotate(piece, counterClockwise)) {
+            piece.rotate(counterClockwise);
+            this.emitTetrisEvent("pieceMoved", piece);
+        }
     }
 
     checkMove(piece, xDelta, yDelta) {
@@ -280,8 +286,10 @@ class TetrisPieceDesc {
             var newX = basePos.x + (counterClock ? yOffset : -yOffset);
             var newY = basePos.y + (counterClock ? -xOffset : xOffset);
 
-            block.setPos({ x: newX, y: newY });
+            block.setPos(newX, newY);
         }
+
+        return this;
     }
 }
 
