@@ -71,8 +71,6 @@ const onPieceMoved = (data) => {
 };
 
 const tetrisCallback = (event, data) => {
-    console.log(event);
-    console.log(data);
     switch (event) {
         case 'activePieceReplaced':
             onActivePieceReplaced(data);
@@ -91,7 +89,7 @@ engine.addTetrisListener(tetrisCallback);
 const updateTetris = () => {
     let gameContinues = engine.step();
     if (gameContinues) {
-        setTimeout(updateTetris, 250);
+        setTimeout(updateTetris, 1000);
     }
 };
 
@@ -120,6 +118,15 @@ const colors = [
 ];
 
 var render = () => {
+    let gamepads = navigator.getGamepads();
+    gamepad = gamepads[0];
+    if (gamepad) {
+        gamepad.buttons.forEach((button, index) => {
+            if (button.pressed || button.touched || button.value) {
+                console.log(`${index} got input!`);
+            }
+        });
+    }
     requestAnimationFrame(render);
     renderer.render(scene, camera);
 };
@@ -159,6 +166,36 @@ let drawDebug = () => {
     debug.vertices.push(new THREE.Vector3(minX, minY, 0));
     return debug;
 };
+
+let gamepad = null;
+
+window.onkeydown = (event) => {
+    switch (event.key) {
+        case 'a':
+            // left
+            engine.requestActivePieceMove(-1, 0);
+            break;
+        case 's':
+            // down
+            break;
+        case 'd':
+            // right
+            engine.requestActivePieceMove(1, 0);
+            break;
+        case 'w':
+            // up (fast drop)
+            break;
+        case 'q':
+            // rotate ccw
+            engine.requestActivePieceRotate(/*ccw*/ true);
+            break;
+        case 'e':
+            // rotate cw
+            engine.requestActivePieceRotate(/*ccw*/ false);
+            break;
+        default:
+    }
+}
 
 let debugMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
 let debug = new THREE.Line(drawDebug(), debugMat);
