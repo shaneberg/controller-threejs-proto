@@ -37,6 +37,26 @@ const onActivePieceReplaced = (data) => {
     });
 };
 
+let running = true;
+const togglePause = () => {
+    running = !running;
+    if (running) {
+        setTimeout(updateTetris, 0);
+    }
+};
+
+const onPalletChange = () => {
+
+    let nextScheme = (curPallet + 1) % pallets.length;
+    colors = pallets[nextScheme];
+    curPallet = nextScheme;
+
+    renderBlocks.forEach((renderBlock) => {
+        let rand = Math.floor(Math.random() * colors.length);
+        renderBlock.renderBlock.material = new THREE.LineBasicMaterial({ color: colors[rand] });
+    });
+};
+
 
 const onPieceMoved = (data) => {
     renderBlocks.forEach((renderBlock) => {
@@ -87,9 +107,11 @@ let engine = new TetrisEngine();
 engine.addTetrisListener(tetrisCallback);
 
 const updateTetris = () => {
-    let gameContinues = engine.step();
-    if (gameContinues) {
-        setTimeout(updateTetris, 1000);
+    if (running) {
+        let gameContinues = engine.step();
+        if (gameContinues) {
+            setTimeout(updateTetris, 1000);
+        }
     }
 };
 
@@ -110,27 +132,91 @@ const drawBlock = (block, mat) => {
     newBlock.vertices.push(new THREE.Vector3(minX, maxY, 0));
     newBlock.vertices.push(new THREE.Vector3(minX, minY, 0));
     return newBlock;
-}
+};
 
-const colors = [
-    0x0000ff,
-    0x00ff00
+
+
+// https://www.shutterstock.com/blog/neon-color-palettes
+const geoglow = [
+    0x08F7FE,
+    0x09FBD3,
+    0xFE53BB,
+    0xF5D300
 ];
 
-var render = () => {
-    // TODO: Only query the game pad every so often...
-    let gamepads = navigator.getGamepads();
-    gamepad = gamepads[0];
-    if (gamepad) {
-        gamepad.buttons.forEach((button, index) => {
-            if (button.pressed || button.touched || button.value) {
-                console.log(`${index} got input!`);
-            }
-        });
-    }
+const neonlights = [
+    0xFFACFC,
+    0xF148FB,
+    0x7122FA,
+    0x560A86
+];
+
+const pysch = [
+    0x75D5FD,
+    0xB76CFD,
+    0xFF2281,
+    0x011FFD
+];
+
+const pallets = [
+    geoglow,
+    neonlights,
+    pysch
+];
+
+let curPallet = 0;
+let colors = pallets[curPallet];
+
+let render = () => {
     requestAnimationFrame(render);
     renderer.render(scene, camera);
 };
+
+let axis = 0;
+
+let readGamepadInput = () => {
+    let gamepads = navigator.getGamepads();
+    gamepad = gamepads[0];
+
+    if (gamepad) {
+        let dpadAxis = gamepad.axes[9];
+
+        if (running) {
+            if (dpadAxis < 0 && dpadAxis > -0.43) {
+
+                engine.requestActivePieceMove(1, 0);
+            }
+
+            if (dpadAxis < 1 && dpadAxis > 0.42) {
+                engine.requestActivePieceMove(-1, 0);
+            }
+
+            if (dpadAxis < 0.15 && dpadAxis > -0.14) {
+                engine.requestActivePieceMove(0, 1);
+            }
+
+            if (gamepad.buttons[0].pressed) {
+                engine.requestActivePieceRotate(true);
+            }
+
+            if (gamepad.buttons[1].pressed) {
+                engine.requestActivePieceRotate(false);
+            }
+        }
+
+        if (gamepad.buttons[10].pressed) {
+            onPalletChange();
+        }
+
+        if (gamepad.buttons[11].pressed) {
+            togglePause();
+        }
+    }
+
+    setTimeout(readGamepadInput, 100);
+};
+
+setTimeout(readGamepadInput, 100);
 
 setTimeout(updateTetris, 1000);
 render();
@@ -198,8 +284,8 @@ window.onkeydown = (event) => {
     }
 }
 
-let debugMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
-let debug = new THREE.Line(drawDebug(), debugMat);
-scene.add(debug);
+// let debugMat = new THREE.LineBasicMaterial({ color: 0xff0000 });
+// let debug = new THREE.Line(drawDebug(), debugMat);
+// scene.add(debug);
 
 renderer.render(scene, camera);
